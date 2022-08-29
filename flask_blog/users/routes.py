@@ -1,12 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
+
 from flask_blog import db, bcrypt
 from flask_blog.models import User, Post
 from flask_blog.users.forms import (
     RegistrationForm,
     LoginForm,
-    ResetPasswordForm,
-    RequestResetForm,
     UpdateAccountForm,
 )
 from flask_blog.users.utils import save_picture
@@ -45,7 +44,12 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
 
-            return redirect(url_for("main.home"))
+            next_page = request.args.get("next")
+            return (
+                redirect(next_page)
+                if next_page
+                else redirect(url_for("posts.allposts"))
+            )
         else:
             flash(
                 "Couldn't sign in to the system. Please, check your email and password",
@@ -92,3 +96,15 @@ def account():
 def logout():
     logout_user()
     return redirect(url_for("main.home"))
+
+
+@users.route("/user/<string:username>")
+def user_posts(username):
+    page = request.args.get("page", 1, type=int)
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = (
+        Post.query.filter_by(author=user)
+        .order_by(Post.date_posted)
+        .paginate(page=page, per_page=5)
+    )
+    return render_template("user_posts.html", posts=posts, user=user)
