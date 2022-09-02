@@ -1,3 +1,11 @@
+from decouple import config
+
+
 class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///site.db"
-    SECRET_KEY = "ae7bae721c43c985b2ad62bd40344971"
+    SECRET_KEY = config("SECRET_KEY")
+    MAIL_SERVER = "smtp.googlemail.com"
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = config("MAIL_USERNAME")
+    MAIL_PASSWORD = config("MAIL_PASSWORD")

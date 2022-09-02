@@ -7,8 +7,10 @@ from flask_blog.users.forms import (
     RegistrationForm,
     LoginForm,
     UpdateAccountForm,
+    RequestResetForm,
+    ResetPasswordForm,
 )
-from flask_blog.users.utils import save_picture
+from flask_blog.users.utils import save_picture, send_reset_email
 
 users = Blueprint("users", __name__)
 
@@ -108,3 +110,39 @@ def user_posts(username):
         .paginate(page=page, per_page=5)
     )
     return render_template("user_posts.html", posts=posts, user=user)
+
+
+@users.route("/reset_password", methods=["GET", "POST"])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for("posts.allposts"))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        send_reset_email(user)
+        flash(
+            "The instructions on how to change your password have been sent to your email address",
+            "info",
+        )
+        return redirect(url_for("users.login"))
+    return render_template("reset_request.html", title="Reset your password", form=form)
+
+
+@users.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for("posts.allposts"))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash("This token is invalid or has already expired.", "warning")
+        return redirect(url_for("users.reset_request"))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
+            "utf-8"
+        )
+        user.password = hashed_password
+        db.session.commit()
+        flash("Your password has been updated! You can now authorize.", "success")
+        return redirect(url_for("users.login"))
+    return render_template("reset_token.html", title="Reset your password", form=form)

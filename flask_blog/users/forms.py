@@ -71,11 +71,11 @@ class RequestResetForm(FlaskForm):
     submit = SubmitField("Send a request to change the password")
 
     @staticmethod
-    def validate_email(email):
+    def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
-        if user:
+        if user is None:
             raise ValidationError(
-                "This email is already taken. Please, choose another one."
+                "This address is either invalid or not associated with any account."
             )
 
 
