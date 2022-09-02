@@ -70,6 +70,22 @@
                 </p>
             </form>
         </div>
+        <main role="main" class="container">
+            <div class="row">
+                <div class="col-md-10">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                </div>
+            </div>
+        </main>
         <div id="content">
             {% block content %}
             {% endblock %}
@@ -78,6 +94,7 @@
     <div id="footer">
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
