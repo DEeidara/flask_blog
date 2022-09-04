@@ -7,15 +7,13 @@ from flask_mail import Mail
 
 login_manager = LoginManager()
 bcrypt = Bcrypt()
-db = SQLAlchemy()
 mail = Mail()
+app = Flask(__name__)
+db = SQLAlchemy(app)
 
 
-def create_app():
-    app = Flask(__name__)
-
+def init_app():
     app.config.from_object(Config)
-
     login_manager.init_app(app)
     bcrypt.init_app(app)
     db.init_app(app)

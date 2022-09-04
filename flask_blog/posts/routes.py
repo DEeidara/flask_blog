@@ -4,7 +4,7 @@ from sqlalchemy import desc
 
 from flask_blog import db
 from flask_blog.models import Post
-from posts.forms import PostForm
+from .forms import PostForm
 
 posts = Blueprint("posts", __name__)
 
